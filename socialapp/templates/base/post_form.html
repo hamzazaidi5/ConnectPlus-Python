@@ -1,0 +1,15 @@
+{% extends 'templates/base/main.html' %}
+
+{% block content %}
+<hr>
+<h1>Post Form</h1>
+<hr>
+<form method="post"  action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit">
+</form>
+<hr>
+<a href="{% url 'posts' %}">Go back</a>
+    <hr>
+{% endblock content %}

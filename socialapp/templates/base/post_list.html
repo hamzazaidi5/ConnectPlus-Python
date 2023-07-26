@@ -1,0 +1,73 @@
+{% extends 'templates/base/main.html' %}
+
+{% block content %}
+<div class="main-container">
+    <div class="posts-column">
+        <hr>
+        <h1>Posts List</h1>
+    <hr>
+
+        {% for post in posts %}
+            <div class="post">
+                <h2>{{ post.title }}</h2>
+{#                <p>Posted by: {{ post.author }}</p>#}
+                <p>{{ post.description }}</p>
+                <a href="{% url 'post' post.id %}">View</a>
+            </div>
+        {% empty %}
+            <h5>No posts in the list</h5>
+        {% endfor %}
+    <hr>
+            <a href="{% url 'post-create' %}">Add New Post</a>
+    <hr>
+        <a href="{% url 'stream' current_user %}">Live Stream</a>
+    <hr>
+
+    </div>
+
+    <div class="users-column">
+        <hr>
+        <h1>Users to Follow</h1>
+<hr>
+        {% for user in users %}
+            <div class="user">
+                <p>{{ user.username }}</p>
+                  <a href="{% url 'user' user.id %}">View</a>
+
+            </div>
+        {% empty %}
+            <h5>No users to follow</h5>
+        {% endfor %}
+    </div>
+</div>
+<br><br>
+<style>
+    .main-container {
+        display: flex;
+        gap: 20px;
+    }
+
+    .posts-column,
+    .users-column {
+        flex: 1;
+    }
+
+    .post,
+    .user {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .post h2,
+    .user p {
+        margin-bottom: 5px;
+    }
+
+    .post a,
+    .user a {
+        margin-right: 10px;
+    }
+</style>
+
+{% endblock content %}

@@ -1,0 +1,54 @@
+{% extends 'templates/base/main.html' %}
+{% block content %}
+    <hr>
+<h1>Post</h1>
+<hr>
+<div class="post">
+                <h2>{{ user }}</h2>
+            </div>
+
+    <hr>
+       {% if check %}
+                    <a href="{% url 'follow' user.id %}">Unfollow</a>
+                {% else %}
+                    <a href="{% url 'follow' user.id %}">Follow</a>
+                {% endif %}
+
+    <hr>
+    <hr>
+        <h1>Posts List</h1>
+    <hr>
+
+        {% for post in posts %}
+            <div class="post">
+                <h2>{{ post.title }}</h2>
+{#                <p>Posted by: {{ post.author }}</p>#}
+            <p>{{ post.description }}</p>
+            </div>
+        {% empty %}
+            <h5>No posts in the list</h5>
+        {% endfor %}
+    <hr>
+    <button ><a href="{% url 'posts' %}">Back</a></button>
+<style>
+
+
+    .post{
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .post h2,
+    .user p {
+        margin-bottom: 5px;
+    }
+
+    .post a,
+    .user a {
+        margin-right: 10px;
+    }
+
+</style>
+
+{% endblock content %}

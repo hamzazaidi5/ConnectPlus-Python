@@ -1,0 +1,17 @@
+{% extends 'templates/base/main.html' %}
+{% load static %}
+
+{% block content %}
+    <hr>
+<h1>Login</h1>
+<hr>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Login">
+</form>
+<hr>
+<p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+
+
+{% endblock content %}

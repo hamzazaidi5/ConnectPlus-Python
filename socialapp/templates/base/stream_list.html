@@ -1,0 +1,106 @@
+{% extends 'templates/base/main.html' %}
+
+{% block content %}
+
+        <hr>
+        <h1>{{ user|upper }} - Live Stream </h1>
+    <hr>
+        <div id="wrap">
+        {% for post in posts %}
+            <div class="post" id="border">
+                <h2>{{ post.title }}</h2>
+                <p>Posted by: {{ post.author }}</p>
+                <a href="{% url 'post' post.description%}">View</a>
+            </div>
+
+
+        {% empty %}
+            <h5>No posts in the list</h5>
+        {% endfor %}
+     </div>
+    <hr>
+            <a href="{% url 'post-create' %}">Add New Post</a>
+
+    <hr>
+
+    <button type="button" class="btn btn-primary" id="refresh-products">Refresh</button>
+    <hr>
+    <br>
+
+<style>
+    .main-container {
+        display: flex;
+        gap: 20px;
+    }
+
+    .posts-column,
+    .users-column {
+        flex: 1;
+    }
+
+    .post,
+    .user {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .post h2,
+    .user p {
+        margin-bottom: 5px;
+    }
+
+    .post a,
+    .user a {
+        margin-right: 10px;
+    }
+</style>
+
+{% endblock content %}
+
+
+{% block end_script %}
+<script type='text/javascript'>
+    $(document).ready(function (){
+        $('#refresh-products').click(function(){
+       $.ajax({
+           type : 'GET',
+           url : "/feed",
+           dataType : 'xml',
+           success: function (response){
+                $('#wrap').empty();
+               console.log(response, "inside ajax");
+               var entries= $(response).find('item');
+               console.log(entries);
+               var values=[];
+               var div = $('<div id="border" class="post"></div>');
+               for(var i=0; i<entries.length;i++) {
+                   var item = entries[i];
+                   console.log("items", item)
+                   var entry = {
+                       'title': $(item).find('title').text(),
+                       'link': $(item).find('guid').text(),
+                       'description': $(item).find('description').text(),
+                       'content_encoded': $(item).find('content_encoded').text(),
+                   };
+
+                    div.append('<h2>' + entry['title'] + '</h2>');
+                    div.append('<p>' + "Posted by: "+ entry['content_encoded'] + '</p>');
+                    div.append('<a href="' + entry['link'] + '">View</a>');
+                    div.append('<hr>');
+
+
+
+               }
+                $('#wrap').append(div);
+               console.log('link', response)
+
+            },
+           error : function (response){
+               console.log(response)
+           }
+       });
+        });
+    });
+</script>
+{% endblock end_script %}
