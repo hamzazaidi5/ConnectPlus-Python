@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Post , Follow , Stream
+from .models import Post, Follow, Stream
 
 
 #
@@ -13,12 +13,12 @@ from .models import Post , Follow , Stream
 class PostAdminModel(admin.ModelAdmin):
     pass
 
+
 @admin.register(Follow)
 class FollowAdminModel(admin.ModelAdmin):
     pass
 
+
 @admin.register(Stream)
 class StreamAdminModel(admin.ModelAdmin):
     pass
-
-

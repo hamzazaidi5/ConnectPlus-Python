@@ -5,16 +5,17 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('base', '0003_remove_post_follower_remove_post_following_follow'),
+        ("base", "0003_remove_post_follower_remove_post_following_follow"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='follow',
-            name='date',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            model_name="follow",
+            name="date",
+            field=models.DateTimeField(
+                auto_now_add=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
     ]

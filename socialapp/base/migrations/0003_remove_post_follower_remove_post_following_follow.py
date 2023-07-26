@@ -6,27 +6,48 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('base', '0002_stream_post_follower_post_following_and_more'),
+        ("base", "0002_stream_post_follower_post_following_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='post',
-            name='follower',
+            model_name="post",
+            name="follower",
         ),
         migrations.RemoveField(
-            model_name='post',
-            name='following',
+            model_name="post",
+            name="following",
         ),
         migrations.CreateModel(
-            name='Follow',
+            name="Follow",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('follower', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='follower', to=settings.AUTH_USER_MODEL)),
-                ('following', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='following', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "follower",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="follower",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "following",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="following",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]
