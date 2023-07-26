@@ -1,10 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Count , Q
-from django.db.models.signals import post_save , post_delete , pre_delete
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
-from django.contrib.auth import get_user
 
 from .managers import PostManager
 

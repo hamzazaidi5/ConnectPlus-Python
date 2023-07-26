@@ -5,11 +5,11 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 import requests
 from django.http import HttpResponse
-from django.shortcuts import render , redirect
-from django.urls import reverse , reverse_lazy
+from django.shortcuts import render, redirect
+from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, ListView, DetailView, CreateView, UpdateView
 
-from .models import Post , Follow , Stream
+from .models import Post, Follow, Stream
 from bs4 import BeautifulSoup
 
 class CustomLoginView(LoginView):
@@ -60,7 +60,7 @@ class StreamList(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
         url = requests.get('http://localhost:8000/feed/')
-        soup = BeautifulSoup(url.content , 'lxml')
+        soup = BeautifulSoup(url.content, 'lxml')
         posts = soup.find_all('item')
         values = []
         for post in posts:
