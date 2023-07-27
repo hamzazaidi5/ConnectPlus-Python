@@ -1,3 +1,5 @@
+import csv
+
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -120,6 +122,25 @@ class PostCreate(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+        form.instance.file = self.request.FILES.get("file")
+        print(form.instance.file)
+        file = form.instance.file
+        csvreader = csv.reader(file.read().decode('utf-8').splitlines())
+        next(csvreader)
+        rows = []
+        d = dict()
+        for row in csvreader:
+            rows.append(row)
+
+        objects = [Post(title = row[0], description = row[1], author = self.request.user) for row in rows]
+        print(objects)
+        Post.objects.bulk_create(objects)
+        # for r in rows:
+        #     d.update({r[0]:r[1]})
+        #     print(r[0])
+        #
+        # print("dict", d)
+        form.save()
         return super(CreateView, self).form_valid(form)
 
 
@@ -133,18 +154,15 @@ class PostUpdate(LoginRequiredMixin, UpdateView):
 def follow(request, pk):
     user = User.objects.get(id=pk)
     if request.method == "POST" or "GET":
-        if request.user not in user.following.all():
-            if Follow.objects.filter(follower=request.user, following=user).exists():
-                Follow.objects.filter(follower=request.user, following=user).delete()
-                print(f"{request.user} unfollowed {user}! ")
-                return redirect(f"/user/{pk}")
-            else:
-                follow_obj = Follow.objects.create(
-                    follower=request.user, following=user
-                )
-                follow_obj.save()
-                print(f"{request.user} followed {user} successfully!")
-                return redirect(f"/user/{pk}")
-        elif request.user in user.following.all():
-            return HttpResponse("In elif")
+        if Follow.objects.filter(follower=request.user, following=user).exists():
+            Follow.objects.filter(follower=request.user, following=user).delete()
+            print(f"{request.user} unfollowed {user}! ")
+            return redirect(f"/user/{pk}")
+        else:
+            follow_obj = Follow.objects.create(
+                follower=request.user, following=user
+            )
+            follow_obj.save()
+            print(f"{request.user} followed {user} successfully!")
+            return redirect(f"/user/{pk}")
     return reverse("posts")

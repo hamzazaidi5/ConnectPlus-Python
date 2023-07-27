@@ -11,6 +11,7 @@ class Post(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    file = models.FileField(upload_to = '', null = True, blank = True)
     created_at = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()
     post = PostManager()

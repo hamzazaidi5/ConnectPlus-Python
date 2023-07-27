@@ -4,9 +4,11 @@
 <hr>
 <h1>Post Form</h1>
 <hr>
-<form method="post"  action="">
+<form method="post"  action="" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
+    <p>File: <input type="file" value="Upload" name="file" id="file"></p>
+    <hr>
     <input type="submit" value="Submit">
 </form>
 <hr>
