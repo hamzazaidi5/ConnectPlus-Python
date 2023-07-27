@@ -8,7 +8,8 @@
                 <p>{{ object.description }}</p>
                 <p>Posted by: {{ object.author }}</p>
             </div>
-
+<hr>
+    <a href="{% url 'post-update' object.id %}">Update</a>
     <hr>
     <button ><a href="{% url 'posts' %}">Back</a></button>
 <style>

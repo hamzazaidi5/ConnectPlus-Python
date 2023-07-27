@@ -1,5 +1,5 @@
 import csv
-
+import pandas as pd
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -113,6 +113,84 @@ class UserDetail(LoginRequiredMixin, DetailView):
         context["user_id"] = user_obj.pk
         return context
 
+def bulk_create_singleCSV(self, file):
+    csvreader = csv.reader(file.read().decode('utf-8').splitlines())
+    next(csvreader)
+    rows = []
+    for row in csvreader:
+        rows.append(row)
+
+    objects = [Post(title = row[0], description = row[1], author = self.request.user) for row in rows]
+    print(objects)
+    Post.objects.bulk_create(objects)
+
+def bulk_update_singleCSV(self, file):
+    csvreader = csv.reader(file.read().decode('utf-8').splitlines())
+    next(csvreader)
+    rows = []
+    for row in csvreader:
+        rows.append(row)
+
+    updates = [{'title': row[0], 'description': row[1]} for row in rows]
+
+    posts = Post.objects.filter(author = self.request.user)
+
+    updated_posts = []
+    for post in posts:
+        for update in updates:
+            if post.title == update['title']:
+                post.description = update['description']
+                updated_posts.append(post)
+
+    print("Updated", updated_posts)
+
+    updated_ones = Post.objects.bulk_update(updated_posts, ['description'])
+    print(updated_ones)
+
+
+def bulk_create_multiple_file(self, file):
+    data = pd.read_excel(file, sheet_name = None)
+    objects = []
+    for sheet_name, sheet_data in data.items():
+        for index, row in sheet_data.iterrows():
+            post = Post(title = row['title'], description = row['description'], author = self.request.user)
+            objects.append(post)
+    print(objects)
+    Post.objects.bulk_create(objects)
+
+def bulk_update_multiple_file(self, file):
+    data = pd.read_excel(file, sheet_name= None)
+    objects = []
+    for sheet_name, sheet_data in data.items():
+        for index, row in sheet_data.iterrows():
+            post = Post(title = row['title'], description = row['description'], author = self.request.user)
+            objects.append(post)
+    #print(objects)
+
+    filtered_posts = Post.objects.filter(author = self.request.user)
+    #print(list(filtered_posts))
+
+    updated_posts = []
+    for post in filtered_posts:
+        for obj in objects:
+            if post.title == obj.title:
+                post.description = obj.description
+                updated_posts.append(post)
+
+    updated_ones = Post.objects.bulk_update(updated_posts, ['description'])
+    print(updated_ones)
+
+class PostUpdate(LoginRequiredMixin, UpdateView):
+    model = Post
+    fields = ['title', 'author']
+    success_url = reverse_lazy("posts")
+    template_name = "templates/base/post_update.html"
+
+    def form_valid(self, form):
+        file = self.request.FILES.get("file")
+        bulk_update_multiple_file(self, file)
+        form.save()
+        return super().form_valid(form)
 
 class PostCreate(LoginRequiredMixin, CreateView):
     model = Post
@@ -123,33 +201,13 @@ class PostCreate(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         form.instance.file = self.request.FILES.get("file")
-        print(form.instance.file)
         file = form.instance.file
-        csvreader = csv.reader(file.read().decode('utf-8').splitlines())
-        next(csvreader)
-        rows = []
-        d = dict()
-        for row in csvreader:
-            rows.append(row)
 
-        objects = [Post(title = row[0], description = row[1], author = self.request.user) for row in rows]
-        print(objects)
-        Post.objects.bulk_create(objects)
-        # for r in rows:
-        #     d.update({r[0]:r[1]})
-        #     print(r[0])
-        #
-        # print("dict", d)
+        #bulk_create_singleCSV(self, file)
+        bulk_create_multiple_file(self, file)
+
         form.save()
         return super(CreateView, self).form_valid(form)
-
-
-class PostUpdate(LoginRequiredMixin, UpdateView):
-    model = Post
-    fields = ["title", "description"]
-    success_url = reverse_lazy("posts")
-    template_name = "templates/base/post_form.html"
-
 
 def follow(request, pk):
     user = User.objects.get(id=pk)
