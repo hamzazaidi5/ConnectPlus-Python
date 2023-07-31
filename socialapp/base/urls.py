@@ -2,9 +2,10 @@ from django.contrib.auth.views import LogoutView
 from django.urls import path
 from . import views
 from .feeds import LatestPost
+from django.views.decorators.cache import cache_page
 
 urlpatterns = [
-    path("", views.PostList.as_view(), name="posts"),
+    path("", cache_page(30)(views.PostList.as_view()), name="posts"),
     path("stream/<int:pk>", views.StreamList.as_view(), name="stream"),
     path("login/", views.CustomLoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(next_page="login"), name="logout"),

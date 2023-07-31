@@ -5,6 +5,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 
 from .managers import PostManager
+from django.core.cache import cache
 
 
 class Post(models.Model):
@@ -34,6 +35,7 @@ class Follow(models.Model):
 
     def __str__(self):
         return str(self.pk)
+
 
 
 @receiver(post_save, sender=Post)
@@ -112,11 +114,22 @@ def create_stream(sender, instance, created, **kwargs):
             follower_stream.save()
 
 
+
 class StreamManager(models.Manager):
     def get_queryset(self):
         # follows = Follow.objects.filter(follower = 1).values_list('following', flat = True)
         # print(follows)
         # return super().get_queryset().filter(following__in = follows).order_by('-date')
+        # cache_key = f"streams_by_author"
+        # cached_data = cache.get(cache_key)
+        # if cached_data is not None :
+        #     print("inside cache")
+        #     return cached_data
+        # elif cached_data is None :
+        #     print("no Not in cached data")
+        #
+        # cache.set(cache_key, posts, timeout = 300)
+
         return super().get_queryset().order_by("-date")
         # return super().get_queryset().filter(following__in = user)
 
