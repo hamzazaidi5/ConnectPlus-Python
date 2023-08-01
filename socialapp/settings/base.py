@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "base",
+    "ip2geotools",
 ]
 
 MIDDLEWARE = [
@@ -32,6 +33,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "base.middlewares.MyMiddleware",
 ]
 
 ROOT_URLCONF = "socialapp.urls"
@@ -64,6 +66,14 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+    },
+    'new': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'new',
+        'USER': 'postgres',
+        'PASSWORD': '1234',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -94,32 +104,33 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    'user_stream_1': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://localhost:6379/2',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-    },
-
-    'user_stream_2': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://localhost:6379/3',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-    },
-    'user_stream_3': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://localhost:6379/4',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-    },
-
-
-
 }
+
+
+
+# 'user_stream_1': {
+#     'BACKEND': 'django_redis.cache.RedisCache',
+#     'LOCATION': 'redis://localhost:6379/2',
+#     'OPTIONS': {
+#         'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#     },
+# },
+#
+# 'user_stream_2': {
+#     'BACKEND': 'django_redis.cache.RedisCache',
+#     'LOCATION': 'redis://localhost:6379/3',
+#     'OPTIONS': {
+#         'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#     },
+# },
+# 'user_stream_3': {
+#     'BACKEND': 'django_redis.cache.RedisCache',
+#     'LOCATION': 'redis://localhost:6379/4',
+#     'OPTIONS': {
+#         'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#     },
+# },
+#
 
 # CACHE_TTL = 60 * 15
 # CACHE_MIDDLEWARE_SECONDS = 30

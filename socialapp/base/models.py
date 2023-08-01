@@ -5,7 +5,6 @@ from django.dispatch import receiver
 from django.urls import reverse
 
 from .managers import PostManager
-from django.core.cache import cache
 
 
 class Post(models.Model):

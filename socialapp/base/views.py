@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 import requests
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
-from django.http import HttpResponse , HttpResponseRedirect
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.cache import cache_page
@@ -16,7 +17,6 @@ from django.views.generic import FormView, ListView, DetailView, CreateView, Upd
 from django.core.cache import cache
 from .models import Post, Follow, Stream
 from bs4 import BeautifulSoup
-from django.utils.decorators import method_decorator
 
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
@@ -56,29 +56,29 @@ class PostList(LoginRequiredMixin, ListView):
         current_user = self.request.user
         context["posts"] = Post.objects.filter(author=current_user)
         users = User.objects.all()
-
-        # check_key = "users"
-        # check_value = cache.get(check_key)
-        # if check_value is None:
-        #     check_value = self.request.user.id
-        #     cache.set(check_key, check_value, timeout = 60 * 60)
-        #     print("Not in cache")
-        # else:
-        #     print("in cache")
-
         current_user = self.request.user
         context["users"] = [user for user in users if user != current_user]
         context["current_user"] = self.request.user.id
         return context
 
 
+# @receiver(post_save, sender = Stream)
+# def clear_cache(sender, instance, created, **kwargs):
+#     if created:
+#         stream_list = StreamList()
+#         stream_list.clear_cache()
+#         print("Cache Cleared")
 
 class StreamList(LoginRequiredMixin, ListView):
     model = Stream
     template_name = "templates/base/stream_list.html"
+    def clear_cache(self):
+        key = f"stream_list_{self.request.user.id}"
+        print(":inside clear cache")
+        cache.delete(key)
 
     def get_posts_from_api(self):
-        url = requests.get("http://localhost:8000/feed/")
+        url = requests.get("http://localhost:8000/feeder/")
         soup = BeautifulSoup(url.content, "lxml")
         posts = soup.find_all("item")
         values = []
@@ -106,42 +106,6 @@ class StreamList(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["user"] = self.request.user
-
-        # #cache implementation
-        # if self.request.user.id == 1:
-        #     key = 'user_stream_1'
-        #     value = cache.get(key)
-        #     if value is None:
-        #         value = self.request.user.id
-        #         cache.set(key, value, timeout = 60 * 60)
-        #         print(cache.get('user_stream_1'))
-        #         print("stream cache")
-        #     else:
-        #         print(cache.get(key))
-        #         print("In stream Cache implementation-1")
-        #
-        # if self.request.user.id == 5:
-        #     key = 'user_stream_2'
-        #     value = cache.get(key)
-        #     if value is not None:
-        #         value = self.request.user.id
-        #         cache.set(key, value, timeout = 60 * 60)
-        #         print("Not in stream cache")
-        #     else:
-        #         print("In stream Cache implementation-2")
-        #
-        # if self.request.user.id == 6:
-        #     key = 'user_stream_3'
-        #     value = cache.get(key)
-        #     if value is not None:
-        #         value = self.request.user.id
-        #         cache.set(key, value, timeout = 60 * 60)
-        #         print("Not in stream cache")
-        #     else:
-        #         print("In stream Cache implementation-3")
-        #
-        # # cache implementation end
-        #posts = self.get_posts_from_api()
         posts = self.get_posts_from_cache()
         context["posts"] = posts
         return context
@@ -298,14 +262,38 @@ class PostCreate(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        form.instance.file = self.request.FILES.get("file")
-        file = form.instance.file
+        file = self.request.FILES.get("file")
+        if file:
+            form.instance.file = file
+            #bulk_create_singleCSV(self, file)
+            bulk_create_multiple_file(self, file)
+        new_data = form.save()
+        #new_data = list(new_data)
+        print("New Data", new_data.title)
 
-        #bulk_create_singleCSV(self, file)
-        bulk_create_multiple_file(self, file)
+        # entry = {
+        #     'title': new_data.title,
+        #     'link' : '',
+        #     'description' : new_data.author,
+        #     'author' : new_data.author,
+        # }
 
-        form.save()
+
+        key = f"stream_list_{self.request.user.id}"
+        current_cache = cache.get(key, [])
+
+        # print("cuurent Cache", current_cache)
+
+        combined_data = current_cache.append(new_data)
+        # print("combined data", combined_data)
+        cache.set(key, combined_data)
+        #new_cache = cache.get(key, [])
+        # print("New cache generated", new_cache)
+
+        # print(":inside clear cache")
+        # cache.delete(key)
         return super(CreateView, self).form_valid(form)
+
 
 def follow(request, pk):
     user = User.objects.get(id=pk)
